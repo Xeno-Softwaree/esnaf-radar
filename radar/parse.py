@@ -152,7 +152,8 @@ def message(d, sender):
         f"Merhaba {isim}, ben {sender}. {ovgu}"
         "Mesai dışında WhatsApp'a yazan müşterilerinize otomatik cevap verip randevu alan "
         "bir asistan kuruyorum. 1 dakikalık demo videosunu göndereyim mi? "
-        "(İstemezseniz HAYIR yazmanız yeterli, bir daha yazmam.)"
+        "Mesaj almak istemezseniz HAYIR yazın, bir daha yazmam. "
+        "(AjenVIO · ajenvio.com/ticari-ileti)"
     )
 
 

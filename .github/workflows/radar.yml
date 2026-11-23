@@ -37,7 +37,7 @@ jobs:
 
       - name: Tara
         env:
-          SENDER: ${{ vars.SENDER || 'Mami (OrwexAI)' }}
+          SENDER: ${{ vars.SENDER || 'Muhammet, AjenVIO'dan' }}
           MAX_PER_QUERY: ${{ vars.MAX_PER_QUERY || '40' }}
           QUERY: ${{ github.event.inputs.query }}
         run: |

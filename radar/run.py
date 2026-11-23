@@ -20,8 +20,9 @@ ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
 CSV_PATH = DATA / "leads.csv"
 MD_PATH = DATA / "LEADS.md"
+IYS_PATH = ROOT / "data" / "iys_yukleme.csv"  # gonderimden once IYS'ye kaydedilecek tacir numaralari
 BLOCK_PATH = ROOT / "hayir.txt"  # HAYIR diyen / istemeyen numaralar
-SENDER = os.environ.get("SENDER", "Mami (OrwexAI)")
+SENDER = os.environ.get("SENDER", "Muhammet, AjenVIO'dan")
 MAX_PER_QUERY = int(os.environ.get("MAX_PER_QUERY", "40"))
 FIELDS = ["skor", "isim", "kategori", "telefon", "web", "puan", "yorum", "adres", "neden",
           "arama", "ilk_gorulme", "maps", "whatsapp", "mesaj", "key"]
@@ -104,13 +105,21 @@ def write_outputs(rows, today):
     new = [r for r in hot if r["ilk_gorulme"] == today]
     lines = [f"# Esnaf Radar — {today}", "",
              f"Toplam {len(rows)} işletme · sıcak (skor 5+, WhatsApp'lı) {len(hot)} · bugün yeni {len(new)}", "",
-             "Linke dokun, WhatsApp mesaj hazır açılır. Günde 20-30 tane, aralıklı gönder. HAYIR diyeni `hayir.txt`'ye ekle.", "",
+             "Linke dokun, WhatsApp mesaj hazır açılır. Günde 20-30 tane, aralıklı gönder.", "",
+             "**Yasal:** göndermeden önce `data/iys_yukleme.csv` numaralarını İYS'ye tacir olarak kaydet ve ret durumuna bak. HAYIR diyeni `hayir.txt`'ye ekle ve 3 iş günü içinde İYS'ye ret olarak bildir.", "",
              "| Skor | İşletme | Yorum | Neden | Yaz |", "|---:|---|---:|---|---|"]
     for r in hot:
         tag = " 🆕" if r["ilk_gorulme"] == today else ""
         name = parse.short_name(r["isim"]).replace("|", "/")
         lines.append(f"| {r['skor']} | [{name}]({r['maps']}){tag} | {r['yorum']} | {r['neden']} | [WhatsApp]({r['whatsapp']}) |")
     MD_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    # IYS: tacir/esnaf alicilarin numaralari gonderimden ONCE IYS'ye kaydedilir ve ret durumu kontrol edilir.
+    # Bu dosya IYS'nin toplu yukleme sablonuna aktarilmak icin hazirlanir (sutunlari IYS sablonuna gore eslestir).
+    with IYS_PATH.open("w", encoding="utf-8-sig", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["alici", "tip", "alici_tipi", "kaynak", "isletme", "ilk_gorulme"])
+        for r in hot:
+            w.writerow(["+" + parse.normalize_phone(r["telefon"]), "MESAJ", "TACIR", "Google Haritalar (alenilestirilmis isletme telefonu)", r["isim"], r["ilk_gorulme"]])
     log(f"Yazildi: {len(rows)} satir, {len(hot)} sicak, {len(new)} yeni")
 
 
