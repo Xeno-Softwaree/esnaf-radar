@@ -88,6 +88,7 @@ def build_row(d, query, today):
     s, why = parse.score(d)
     msg = parse.message(d, SENDER)
     return {**{k: d.get(k, "") for k in ("isim", "kategori", "telefon", "web", "puan", "yorum", "adres", "maps", "key")},
+            "puan": d.get("puan", ""), "yorum": d.get("yorum", ""),
             "skor": s, "neden": why, "arama": query, "ilk_gorulme": today,
             "whatsapp": parse.wa_link(d.get("telefon", ""), msg), "mesaj": msg}
 
@@ -107,7 +108,7 @@ def write_outputs(rows, today):
              "| Skor | İşletme | Yorum | Neden | Yaz |", "|---:|---|---:|---|---|"]
     for r in hot:
         tag = " 🆕" if r["ilk_gorulme"] == today else ""
-        name = r["isim"].replace("|", "/")
+        name = parse.short_name(r["isim"]).replace("|", "/")
         lines.append(f"| {r['skor']} | [{name}]({r['maps']}){tag} | {r['yorum']} | {r['neden']} | [WhatsApp]({r['whatsapp']}) |")
     MD_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8")
     log(f"Yazildi: {len(rows)} satir, {len(hot)} sicak, {len(new)} yeni")
@@ -149,7 +150,12 @@ def main():
                 row = build_row(d, q, today)
                 found[r["key"]] = row
                 log(f"  + {row['skor']:>3} {row['isim']} {row['telefon']} ({row['neden']})")
-    rows = [r for r in found.values() if not (r.get("telefon") and r["telefon"] in blocked)]
+    rows = []
+    for r in found.values():
+        if r.get("telefon") and r["telefon"] in blocked:
+            continue
+        d = {**r, "yorum": parse.to_int(str(r.get("yorum", ""))), "puan": parse.to_float(str(r.get("puan", "")))}
+        rows.append({**r, **build_row(d, r.get("arama", ""), r.get("ilk_gorulme") or today)})
     write_outputs(rows, today)
 
 

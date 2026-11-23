@@ -127,8 +127,25 @@ def score(d):
     return s, ", ".join(why)
 
 
+def short_name(name):
+    """'Aleyna Beauty 🫶 Tuzla | Cilt Bakimi - Lazer' -> 'Aleyna Beauty'"""
+    n = re.split(r"\s[|\-–(]\s?|\s\(|\||,", name or "")[0]
+    n = re.sub(r"[^\w\s&'.]", "", n)
+    n = re.sub(r"\b(Tuzla|Pendik|Kartal|İstanbul|Istanbul)\b", "", n, flags=re.I)
+    words = clean(n).split()
+    stop = {"güzellik", "merkezi", "salonu", "lazer", "epilasyon", "cilt", "bakımı"}
+    out = []
+    for w in words:
+        if len(out) >= 2 and w.lower() in stop:
+            break
+        out.append(w)
+        if len(out) == 4:
+            break
+    return " ".join(out) or clean(name)[:30]
+
+
 def message(d, sender):
-    isim = d.get("isim") or "merhaba"
+    isim = short_name(d.get("isim")) or "merhaba"
     yorum = d.get("yorum", 0)
     ovgu = f"Google'daki {yorum} yorumunuzu gördüm, tebrikler. " if yorum >= 20 else ""
     return (
