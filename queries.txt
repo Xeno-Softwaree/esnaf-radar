@@ -1,0 +1,11 @@
+# Her satir bir Google Maps aramasi. # ile baslayan satir atlanir.
+güzellik merkezi Tuzla
+lazer epilasyon Tuzla
+güzellik salonu Pendik
+lazer epilasyon Pendik
+cilt bakımı Pendik
+güzellik merkezi Kartal
+lazer epilasyon Kartal
+kaş kirpik Kartal
+# diyetisyen Tuzla
+# diyetisyen Pendik

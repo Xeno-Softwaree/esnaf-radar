@@ -1,0 +1,1 @@
+# HAYIR diyen / istemeyen numaralar, her satira bir tane (ör. 05321234567)

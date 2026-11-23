@@ -1,0 +1,56 @@
+name: Esnaf Radar
+
+on:
+  schedule:
+    - cron: "0 20 * * *"   # her gece 23:00 (Istanbul)
+  workflow_dispatch:
+    inputs:
+      query:
+        description: "Tek arama (bos birakirsan queries.txt calisir)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: radar
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Kurulum
+        run: |
+          pip install -r requirements.txt
+          scrapling install
+          python -m patchright install --with-deps chromium
+
+      - name: Tara
+        env:
+          SENDER: ${{ vars.SENDER || 'Mami (OrwexAI)' }}
+          MAX_PER_QUERY: ${{ vars.MAX_PER_QUERY || '40' }}
+          QUERY: ${{ github.event.inputs.query }}
+        run: |
+          if [ -n "$QUERY" ]; then
+            python -m radar.run "$QUERY"
+          else
+            python -m radar.run
+          fi
+
+      - name: Sonuclari kaydet
+        run: |
+          git config user.name "esnaf-radar"
+          git config user.email "actions@users.noreply.github.com"
+          git add data
+          git diff --cached --quiet || git commit -m "radar: $(date +%F) sonuclari"
+          git push
